@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "${id}",
+  "version": "${version}",
+  "name": "${name}",
+  "description": "",
+  "icon": "assets/rpc.png",
+  "authors": [
+    "Furq"
+  ],
+  "contact": {
+    "homepage": "https://modrinth.com/mod/ResourcePackCached",
+    "sources": "https://github.com/Furq07/ResourcePackCached"
+  },
+  "license": "GPL-3.0",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "dev.furq.resourcepackcached.ResourcePackCachedClient"
+    ]
+  },
+  "mixins": [
+    "resourcepackcached.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.15",
+    "minecraft": "${mcdep}"
+  }
+}
