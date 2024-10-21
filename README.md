@@ -30,7 +30,7 @@ For assistance, visit the [GitHub Repository](https://github.com/Furq07/resource
 | --- | --- |
 | **Forge Support** | Planned |
 | **NeoForge Support** | Planned |
-| **Multiple Resource Pack Loading (1.20.4+)** | Planned |
+| **Multi-Server Pack Support (1.20.3+)** | Planned |
 
 ## 🤝 **Partner**
 
