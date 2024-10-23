@@ -1,13 +1,15 @@
 # 🗃️ **ResourcePackCached**
 
-Optimizes the handling of server resource packs. It caches the resource pack locally, improving load times and reducing network usage for players joining servers with custom resource packs.
+Optimizes server resource pack handling by caching, reusing across sessions, and eliminating redundant loading and unloading.
 
 ## 🎯 **Primary Use Case**
 
-Ideal for modpack creators and server owners who want to:
-- Keep resource packs on the server for easier updates
-- Reduce modpack size by excluding resource packs
-- Improve player experience with faster load times and reduced downloads
+Ideal for those who want to:
+- Keep resource packs on the server for easier updates.
+- Reduce modpack size by excluding resource packs and keeping it on server.
+- Improve user experience with faster load times and reduced loading and unloading.
+- Reduce network usage by reusing cached resource packs.
+- Do debugging for mods/plugins using resource packs (faster load times).
 
 ## 💻 **Functionality**
 
@@ -15,8 +17,8 @@ ResourcePackCached operates seamlessly in the background:
 
 | Step | Action |
 | --- | --- |
-| 1️⃣ | Caches server resource packs locally on first join. |
-| 2️⃣ | Automatically uses cached versions on subsequent joins. |
+| 1️⃣ | Downloads and caches server resource packs on first join. |
+| 2️⃣ | Skips loading of resource packs on subsequent joins. |
 | 3️⃣ | Keeps resource packs loaded after disconnecting from servers. |
 | 4️⃣ | Reapplies cached packs when the game starts. |
 
@@ -30,7 +32,6 @@ For assistance, visit the [GitHub Repository](https://github.com/Furq07/resource
 | --- | --- |
 | **Forge Support** | Planned |
 | **NeoForge Support** | Planned |
-| **Multi-Server Pack Support (1.20.3+)** | Planned |
 
 ## 🤝 **Partner**
 

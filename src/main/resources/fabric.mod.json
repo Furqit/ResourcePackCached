@@ -3,7 +3,7 @@
   "id": "${id}",
   "version": "${version}",
   "name": "${name}",
-  "description": "",
+  "description": "Optimizes server resource pack handling by caching, reusing across sessions, and eliminating redundant loading and unloading.",
   "icon": "assets/rpc.png",
   "authors": [
     "Furq"

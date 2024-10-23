@@ -2,10 +2,10 @@
   "required": true,
   "package": "dev.furq.resourcepackcached.mixin",
   "compatibilityLevel": "JAVA_17",
-  "mixins": [
-    "DownloadedPackSourceMixin"
-  ],
   "injectors": {
     "defaultRequire": 1
-  }
+  },
+  "client": [
+    "DownloadedPackSourceMixin"
+  ]
 }
