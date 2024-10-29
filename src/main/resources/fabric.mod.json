@@ -3,27 +3,29 @@
   "id": "${id}",
   "version": "${version}",
   "name": "${name}",
-  "description": "Optimizes server resource pack handling by caching, reusing across sessions, and eliminating redundant loading and unloading.",
-  "icon": "assets/rpc.png",
+  "description": "${description}",
   "authors": [
     "Furq"
   ],
   "contact": {
-    "homepage": "https://modrinth.com/mod/ResourcePackCached",
-    "sources": "https://github.com/Furq07/ResourcePackCached"
+    "homepage": "${modrinth}",
+    "sources": "${source}",
+    "issues": "${issues}"
   },
-  "license": "GPL-3.0",
-  "environment": "client",
+  "license": "${license}",
+  "icon": "assets/${id}/icon.png",
+  "environment": "*",
   "entrypoints": {
     "client": [
-      "dev.furq.resourcepackcached.ResourcePackCachedClient"
+      "dev.furq.resourcepackcached.ResourcePackCached"
     ]
   },
   "mixins": [
-    "resourcepackcached.mixins.json"
+    "${id}.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.15",
-    "minecraft": "${mcdep}"
+    "minecraft": ">=1.20",
+    "java": ">=17"
   }
 }

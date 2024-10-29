@@ -10,10 +10,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.*;
-import net.minecraft.server.packs.repository.PackSource;
 //? if >1.20.2 {
-import dev.furq.resourcepackcached.ResourcePackCachedClient;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.resources.server.DownloadedPackSource;
 import net.minecraft.client.resources.server.PackLoadFeedback;
 import net.minecraft.client.resources.server.ServerPackManager;
@@ -25,6 +22,7 @@ import java.net.URL;
 //?} elif <=1.20.2 {
 /*import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.DownloadedPackSource;
+import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.packs.FilePackResources;
 import net.minecraft.server.packs.PackType;
@@ -41,7 +39,7 @@ import org.slf4j.Logger;
 
 //? if <=1.20.2 {
 /*@Mixin(DownloadedPackSource.class)
-public abstract class DownloadedPackSourceMixin {
+abstract class DownloadedPackSourceMixin {
 
     @Shadow
     @Final
@@ -129,24 +127,11 @@ public abstract class DownloadedPackSourceMixin {
 }
 *///?} else {
 @Mixin(DownloadedPackSource.class)
-public abstract class DownloadedPackSourceMixin {
-
-    @Shadow
-    ServerPackManager manager;
-    @Shadow
-    private PackSource packType;
-
-    @Inject(method = "pushLocalPack", at = @At("HEAD"))
-    private void onPushLocalPack(UUID uUID, Path path, CallbackInfo ci) {
-        if (CachingUtils.isCachedResourcePack(uUID, path)) {
-            this.packType = PackSource.SERVER;
-            this.manager.allowServerPacks();
-        }
-    }
+abstract class DownloadedPackSourceMixin {
 
     @Inject(method = "loadRequestedPacks", at = @At("RETURN"))
     private void loadRequestedPacks(List<PackReloadConfig.IdAndPath> list, CallbackInfoReturnable<List<Pack>> cir) {
-        ResourcePackCachedClient.isProcessing = false;
+        CachingUtils.isProcessing = false;
     }
 }
 
@@ -159,6 +144,8 @@ abstract class ServerPackManagerMixin {
     Map<UUID, Path> latestPacks = new HashMap<>();
     @Unique
     private boolean isNewSequence = true;
+    @Shadow
+    private ServerPackManager.PackPromptStatus packPromptStatus;
 
     @Shadow
     public abstract void popPack(UUID id);
@@ -166,31 +153,38 @@ abstract class ServerPackManagerMixin {
     @Shadow
     abstract void registerForUpdate();
 
+    @Inject(method = "pushLocalPack", at = @At("HEAD"))
+    private void onPushLocalPack(UUID uUID, Path path, CallbackInfo ci) {
+        if (CachingUtils.isCachedResourcePack(uUID, path)) {
+            packPromptStatus = ServerPackManager.PackPromptStatus.ALLOWED;
+        }
+    }
+
     @Inject(method = "pushPack", at = @At("HEAD"), cancellable = true)
     public void onPushPack(UUID id, URL url, HashCode hashCode, CallbackInfo ci) {
-        ResourcePackCachedClient.isProcessing = true;
+        CachingUtils.isProcessing = true;
         if (isNewSequence) {
             latestPacks.clear();
             isNewSequence = false;
         }
 
-        File downloadPath = new File(FabricLoader.getInstance().getGameDir().toFile().getPath(), "downloads/" + id + "/" + hashCode.toString());
+        File downloadPath = new File(CachingUtils.GAME_DIR, "downloads/" + id + "/" + hashCode.toString());
         latestPacks.put(id, downloadPath.toPath());
 
         if (CachingUtils.isCachedResourcePack(id, downloadPath.toPath())) {
             this.packLoadFeedback.reportFinalResult(id, PackLoadFeedback.FinalResult.APPLIED);
-            ResourcePackCachedClient.isJoin = false;
-            ResourcePackCachedClient.isProcessing = false;
+            CachingUtils.isJoin = false;
+            CachingUtils.isProcessing = false;
             this.registerForUpdate();
             ci.cancel();
         }
-        ResourcePackCachedClient.isJoin = false;
+        CachingUtils.isJoin = false;
     }
 
     @Inject(method = "cleanupRemovedPacks", at = @At("HEAD"))
     private void onCleanupRemovedPacks(CallbackInfo ci) {
         isNewSequence = true;
-        if (!ResourcePackCachedClient.isProcessing && !ResourcePackCachedClient.isJoin) {
+        if (!CachingUtils.isProcessing && !CachingUtils.isJoin) {
             if (!latestPacks.isEmpty()) {
                 Map<UUID, Path> cachedPacks = CachingUtils.readCacheFile();
                 List<UUID> packsToRemove = new ArrayList<>();
@@ -206,7 +200,7 @@ abstract class ServerPackManagerMixin {
                 }
 
                 CachingUtils.writeCacheFile(latestPacks);
-                ResourcePackCachedClient.isJoin = true;
+                CachingUtils.isJoin = true;
             }
         }
     }
@@ -214,7 +208,7 @@ abstract class ServerPackManagerMixin {
     @Inject(method = "popAll", at = @At("HEAD"), cancellable = true)
     private void onPopAll(CallbackInfo ci) {
         latestPacks.clear();
-        ResourcePackCachedClient.isJoin = true;
+        CachingUtils.isJoin = true;
         ci.cancel();
     }
 }
