@@ -114,9 +114,14 @@ tasks.processResources {
     }
     if (loader.isFabric) {
         filesMatching("fabric.mod.json") { expand(props) }
-        exclude("META-INF/mods.toml")
+        exclude("META-INF/mods.toml", "META-INF/neoforge.mods.toml")
     }
-    if (loader.isNeoForge || loader.isForge) {
+    if (loader.isNeoForge) {
+        filesMatching("META-INF/mods.toml") { expand(props) }
+        filesMatching("META-INF/neoforge.mods.toml") { expand(props) }
+        exclude("fabric.mod.json")
+    }
+    if (loader.isForge) {
         filesMatching("META-INF/mods.toml") { expand(props) }
         exclude("fabric.mod.json")
     }
