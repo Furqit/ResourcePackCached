@@ -26,13 +26,6 @@ ResourcePackCached operates seamlessly in the background:
 
 For assistance, visit the [GitHub Repository](https://github.com/Furq07/resourcepackcached/issues) or join our [Discord Server](https://discord.gg/XhZzmvzPDV).
 
-## 🚀 **Todo**
-
-| Feature | Status |
-| --- | --- |
-| **Forge Support** | Planned |
-| **NeoForge Support** | Planned |
-
 ## 🤝 **Partner**
 
 <p align="center"> <a href="https://billing.revivenode.com/aff.php?aff=517"> <img src="https://versions.revivenode.com/resources/banner_wide_one.gif" alt="Partner GIF"> </a> </p> <p align="center"> Use code <b>FURQ</b> for 15% off your order! </p>
