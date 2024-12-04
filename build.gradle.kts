@@ -101,8 +101,11 @@ tasks.processResources {
         put("mixins", mod.mixins)
         put("loader", loader.loader)
 
-        if (loader.isForge || loader.isNeoForge) {
+        if (loader.isForge) {
             put("forgeConstraint", "[${findProperty("deps.forge")},)")
+        }
+        if (loader.isNeoForge) {
+            put("forgeConstraint", "[${findProperty("deps.neoforge")},)")
         }
     }
 
