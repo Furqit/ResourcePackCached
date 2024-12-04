@@ -27,7 +27,6 @@ class LoaderData {
 class McData {
     val version = property("mod.mc_version")
     val dep = property("mod.mc_dep")
-    val targets = property("mod.mc_targets").toString().split(", ")
 }
 
 val mc = McData()
@@ -103,7 +102,7 @@ tasks.processResources {
         put("loader", loader.loader)
 
         if (loader.isForge || loader.isNeoForge) {
-            put("forgeConstraint", findProperty("modstoml.forge_constraint"))
+            put("forgeConstraint", "[${findProperty("deps.forge")},)")
         }
     }
 

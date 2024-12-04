@@ -17,6 +17,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -34,19 +35,20 @@ public class CachingUtils {
     //?}
 
     public static void writeCacheFile(Map<UUID, Path> packs) {
-        JsonObject jsonObject = new JsonObject();
-        JsonArray packsArray = new JsonArray();
-
-        for (Map.Entry<UUID, Path> entry : packs.entrySet()) {
-            JsonObject packObject = new JsonObject();
-            packObject.addProperty("uuid", entry.getKey().toString());
-            packObject.addProperty("path", entry.getValue().toString());
-            packsArray.add(packObject);
-        }
-
-        jsonObject.add("packs", packsArray);
-
         try {
+            JsonObject jsonObject = new JsonObject();
+            JsonArray packsArray = new JsonArray();
+
+            for (Map.Entry<UUID, Path> entry : packs.entrySet()) {
+                if (Files.exists(entry.getValue())) {
+                    JsonObject packObject = new JsonObject();
+                    packObject.addProperty("uuid", entry.getKey().toString());
+                    packObject.addProperty("path", entry.getValue().toString());
+                    packsArray.add(packObject);
+                }
+            }
+
+            jsonObject.add("packs", packsArray);
             FileUtils.writeStringToFile(CACHE_FILE, jsonObject.toString(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             LOGGER.error("Failed to write cache file", e);
@@ -57,14 +59,19 @@ public class CachingUtils {
         Map<UUID, Path> packs = new HashMap<>();
         if (CACHE_FILE.exists()) {
             try {
-                JsonObject jsonObject = JsonParser.parseString(FileUtils.readFileToString(CACHE_FILE, StandardCharsets.UTF_8)).getAsJsonObject();
-                JsonArray packsArray = jsonObject.getAsJsonArray("packs");
-                if (packsArray != null) {
-                    for (int i = 0; i < packsArray.size(); i++) {
-                        JsonObject packObject = packsArray.get(i).getAsJsonObject();
-                        UUID uuid = UUID.fromString(packObject.get("uuid").getAsString());
-                        Path path = Paths.get(packObject.get("path").getAsString());
-                        packs.put(uuid, path);
+                String content = FileUtils.readFileToString(CACHE_FILE, StandardCharsets.UTF_8);
+                if (!content.isEmpty()) {
+                    JsonObject jsonObject = JsonParser.parseString(content).getAsJsonObject();
+                    JsonArray packsArray = jsonObject.getAsJsonArray("packs");
+                    if (packsArray != null) {
+                        for (int i = 0; i < packsArray.size(); i++) {
+                            JsonObject packObject = packsArray.get(i).getAsJsonObject();
+                            UUID uuid = UUID.fromString(packObject.get("uuid").getAsString());
+                            Path path = Paths.get(packObject.get("path").getAsString());
+                            if (Files.exists(path)) {
+                                packs.put(uuid, path);
+                            }
+                        }
                     }
                 }
             } catch (IOException e) {

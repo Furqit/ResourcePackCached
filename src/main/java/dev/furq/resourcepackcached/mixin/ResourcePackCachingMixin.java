@@ -2,11 +2,13 @@ package dev.furq.resourcepackcached.mixin;
 
 import dev.furq.resourcepackcached.utils.CachingUtils;
 import net.minecraft.server.packs.repository.Pack;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+
 import java.io.File;
 import java.nio.file.Path;
 import java.util.*;
@@ -18,6 +20,7 @@ import net.minecraft.client.resources.server.PackReloadConfig;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import com.google.common.hash.HashCode;
+
 import java.net.URL;
 //?} elif <=1.20.2 {
 /*import net.minecraft.client.Minecraft;
@@ -26,7 +29,6 @@ import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.packs.FilePackResources;
 import net.minecraft.server.packs.PackType;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.Final;
 import java.util.concurrent.CompletableFuture;
@@ -97,20 +99,20 @@ abstract class DownloadedPackSourceMixin {
 
             Pack newServerPack = Pack.create("server", SERVER_NAME, true, resourcesSupplier, info, /^? if <1.20.2 {^/PackType.CLIENT_RESOURCES,/^?}^/ Pack.Position.TOP, true, packSource);
             Map<UUID, Path> cachedPacks = CachingUtils.readCacheFile();
-            UUID substituteUUID = UUID.fromString("b700a6a9-58e1-4e5b-a995-ead5edc8f72a");
-            Path resourcePack = cachedPacks.get(substituteUUID);
+            final UUID SUBSTITUTE_UUID = UUID.fromString("b700a6a9-58e1-4e5b-a995-ead5edc8f72a");
+            Path resourcePack = cachedPacks.get(SUBSTITUTE_UUID);
 
             CompletableFuture<Void> returnValue = null;
 
             if (resourcePack == null || isInitializing) {
-                cachedPacks.put(substituteUUID, file.toPath());
+                cachedPacks.put(SUBSTITUTE_UUID, file.toPath());
                 CachingUtils.writeCacheFile(cachedPacks);
                 this.serverPack = newServerPack;
                 returnValue = Minecraft.getInstance().delayTextureReload();
             } else if (this.serverPack != null || !file.equals(resourcePack.toFile())) {
                 this.serverPack = newServerPack;
                 if (!file.equals(resourcePack.toFile())) {
-                    cachedPacks.put(substituteUUID, file.toPath());
+                    cachedPacks.put(SUBSTITUTE_UUID, file.toPath());
                     CachingUtils.writeCacheFile(cachedPacks);
                     returnValue = Minecraft.getInstance().delayTextureReload();
                 }
@@ -138,10 +140,10 @@ abstract class DownloadedPackSourceMixin {
 @Mixin(ServerPackManager.class)
 abstract class ServerPackManagerMixin {
 
+    @Unique
+    private final Map<UUID, Path> latestPacks = new HashMap<>();
     @Shadow
     PackLoadFeedback packLoadFeedback;
-    @Unique
-    Map<UUID, Path> latestPacks = new HashMap<>();
     @Unique
     private boolean isNewSequence = true;
     @Shadow
@@ -161,24 +163,30 @@ abstract class ServerPackManagerMixin {
     }
 
     @Inject(method = "pushPack", at = @At("HEAD"), cancellable = true)
-    public void onPushPack(UUID id, URL url, HashCode hashCode, CallbackInfo ci) {
-        CachingUtils.isProcessing = true;
-        if (isNewSequence) {
-            latestPacks.clear();
-            isNewSequence = false;
-        }
+    public void onPushPack(UUID id, URL url, @Nullable HashCode hashCode, CallbackInfo ci) {
+        try {
+            CachingUtils.isProcessing = true;
+            if (isNewSequence) {
+                latestPacks.clear();
+                isNewSequence = false;
+            }
 
-        File downloadPath = new File(CachingUtils.GAME_DIR, "downloads/" + id + "/" + hashCode.toString());
-        latestPacks.put(id, downloadPath.toPath());
+            String hashString = hashCode != null ? hashCode.toString() : String.valueOf(url.toString().hashCode());
+            File downloadPath = new File(CachingUtils.GAME_DIR, "downloads/" + id + "/" + hashString);
+            latestPacks.put(id, downloadPath.toPath());
 
-        if (CachingUtils.isCachedResourcePack(id, downloadPath.toPath())) {
-            this.packLoadFeedback.reportFinalResult(id, PackLoadFeedback.FinalResult.APPLIED);
+            if (CachingUtils.isCachedResourcePack(id, downloadPath.toPath())) {
+                this.packLoadFeedback.reportFinalResult(id, PackLoadFeedback.FinalResult.APPLIED);
+                CachingUtils.isJoin = false;
+                CachingUtils.isProcessing = false;
+                this.registerForUpdate();
+                ci.cancel();
+            }
+        } catch (Exception e) {
+            CachingUtils.LOGGER.error("Error in pushPack", e);
+        } finally {
             CachingUtils.isJoin = false;
-            CachingUtils.isProcessing = false;
-            this.registerForUpdate();
-            ci.cancel();
         }
-        CachingUtils.isJoin = false;
     }
 
     @Inject(method = "cleanupRemovedPacks", at = @At("HEAD"))
