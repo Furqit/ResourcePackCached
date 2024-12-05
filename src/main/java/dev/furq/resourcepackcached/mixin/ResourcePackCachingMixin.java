@@ -170,17 +170,17 @@ abstract class ServerPackManagerMixin {
                 latestPacks.clear();
                 isNewSequence = false;
             }
+            if (hashCode != null) {
+                File downloadPath = new File(CachingUtils.GAME_DIR, "downloads/" + id + "/" + hashCode);
+                latestPacks.put(id, downloadPath.toPath());
 
-            String hashString = hashCode != null ? hashCode.toString() : String.valueOf(url.toString().hashCode());
-            File downloadPath = new File(CachingUtils.GAME_DIR, "downloads/" + id + "/" + hashString);
-            latestPacks.put(id, downloadPath.toPath());
-
-            if (CachingUtils.isCachedResourcePack(id, downloadPath.toPath())) {
-                this.packLoadFeedback.reportFinalResult(id, PackLoadFeedback.FinalResult.APPLIED);
-                CachingUtils.isJoin = false;
-                CachingUtils.isProcessing = false;
-                this.registerForUpdate();
-                ci.cancel();
+                if (CachingUtils.isCachedResourcePack(id, downloadPath.toPath())) {
+                    this.packLoadFeedback.reportFinalResult(id, PackLoadFeedback.FinalResult.APPLIED);
+                    CachingUtils.isJoin = false;
+                    CachingUtils.isProcessing = false;
+                    this.registerForUpdate();
+                    ci.cancel();
+                }
             }
         } catch (Exception e) {
             CachingUtils.LOGGER.error("Error in pushPack", e);
