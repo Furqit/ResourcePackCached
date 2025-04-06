@@ -1,8 +1,5 @@
 package dev.furq.resourcepackcached.utils;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 //? if fabric {
 import net.fabricmc.loader.api.FabricLoader;
 //?} elif forge {
@@ -10,10 +7,12 @@ import net.fabricmc.loader.api.FabricLoader;
  *///?} elif neoforge {
 /*import net.neoforged.fml.loading.FMLPaths;
  *///?}
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -21,7 +20,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 public class CachingUtils {
@@ -34,12 +32,12 @@ public class CachingUtils {
     public static boolean isJoin = false;
     //?}
 
-    public static void writeCacheFile(Map<UUID, Path> packs) {
+    public static void writeCacheFile(HashMap<UUID, Path> packs) {
         try {
             JsonObject jsonObject = new JsonObject();
             JsonArray packsArray = new JsonArray();
 
-            for (Map.Entry<UUID, Path> entry : packs.entrySet()) {
+            for (HashMap.Entry<UUID, Path> entry : packs.entrySet()) {
                 if (Files.exists(entry.getValue())) {
                     JsonObject packObject = new JsonObject();
                     packObject.addProperty("uuid", entry.getKey().toString());
@@ -55,8 +53,8 @@ public class CachingUtils {
         }
     }
 
-    public static Map<UUID, Path> readCacheFile() {
-        Map<UUID, Path> packs = new HashMap<>();
+    public static HashMap<UUID, Path> readCacheFile() {
+        HashMap<UUID, Path> packs = new HashMap<>();
         if (CACHE_FILE.exists()) {
             try {
                 String content = FileUtils.readFileToString(CACHE_FILE, StandardCharsets.UTF_8);
@@ -83,7 +81,7 @@ public class CachingUtils {
 
     //? if >1.20.2 {
     public static boolean isCachedResourcePack(UUID uuid, Path path) {
-        Map<UUID, Path> cachedPacks = readCacheFile();
+        HashMap<UUID, Path> cachedPacks = readCacheFile();
         return cachedPacks.containsKey(uuid) && cachedPacks.get(uuid).equals(path);
     }
     //?}

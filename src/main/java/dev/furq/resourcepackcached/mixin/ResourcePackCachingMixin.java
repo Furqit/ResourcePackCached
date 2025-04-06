@@ -8,7 +8,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-
 import java.io.File;
 import java.nio.file.Path;
 import java.util.*;
@@ -20,7 +19,6 @@ import net.minecraft.client.resources.server.PackReloadConfig;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import com.google.common.hash.HashCode;
-
 import java.net.URL;
 //?} elif <=1.20.2 {
 /*import net.minecraft.client.Minecraft;
@@ -98,7 +96,7 @@ abstract class DownloadedPackSourceMixin {
             LOGGER.info("Applying server pack {}", file);
 
             Pack newServerPack = Pack.create("server", SERVER_NAME, true, resourcesSupplier, info, /^? if <1.20.2 {^/PackType.CLIENT_RESOURCES,/^?}^/ Pack.Position.TOP, true, packSource);
-            Map<UUID, Path> cachedPacks = CachingUtils.readCacheFile();
+            HashMap<UUID, Path> cachedPacks = CachingUtils.readCacheFile();
             final UUID SUBSTITUTE_UUID = UUID.fromString("b700a6a9-58e1-4e5b-a995-ead5edc8f72a");
             Path resourcePack = cachedPacks.get(SUBSTITUTE_UUID);
 
@@ -141,7 +139,7 @@ abstract class DownloadedPackSourceMixin {
 abstract class ServerPackManagerMixin {
 
     @Unique
-    private final Map<UUID, Path> latestPacks = new HashMap<>();
+    private final HashMap<UUID, Path> latestPacks = new HashMap<>();
     @Shadow
     PackLoadFeedback packLoadFeedback;
     @Unique
@@ -194,10 +192,10 @@ abstract class ServerPackManagerMixin {
         isNewSequence = true;
         if (!CachingUtils.isProcessing && !CachingUtils.isJoin) {
             if (!latestPacks.isEmpty()) {
-                Map<UUID, Path> cachedPacks = CachingUtils.readCacheFile();
+                HashMap<UUID, Path> cachedPacks = CachingUtils.readCacheFile();
                 List<UUID> packsToRemove = new ArrayList<>();
 
-                for (Map.Entry<UUID, Path> pack : cachedPacks.entrySet()) {
+                for (HashMap.Entry<UUID, Path> pack : cachedPacks.entrySet()) {
                     if (!latestPacks.containsKey(pack.getKey())) {
                         packsToRemove.add(pack.getKey());
                     }

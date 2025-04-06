@@ -1,31 +1,45 @@
-# 🗃️ **ResourcePackCached**
+# **ResourcePackCached**
 
-Optimizes server resource pack handling by caching, reusing across sessions, and eliminating redundant loading and unloading.
+**ResourcePackCached** improves how Minecraft handles server resource packs by preventing them from being unloaded when disconnecting. This allows the pack to stay loaded across sessions, so players don’t have to reload it when rejoining the same server. It also reapplies the last used server resource pack on game startup—saving time and improving the overall experience.
 
-## 🎯 **Primary Use Case**
+---
 
-Ideal for those who want to:
-- Keep resource packs on the server for easier updates.
-- Reduce modpack size by excluding resource packs and keeping it on server.
-- Improve user experience with faster load times and reduced loading and unloading.
-- Reduce network usage by reusing cached resource packs.
-- Do debugging for mods/plugins using resource packs (faster load times).
+## **Primary Use Case**
 
-## 💻 **Functionality**
+Perfect for those who want to:
 
-ResourcePackCached operates seamlessly in the background:
+- Host resource packs on the server to simplify updates and reduce modpack size by removing local copies.
+- Improve user experience with faster join times and no repeated loading.
+- Speed up testing and debugging for mods or plugins that use resource packs.
 
-| Step | Action |
-| --- | --- |
-| 1️⃣ | Downloads and caches server resource packs on first join. |
-| 2️⃣ | Skips loading of resource packs on subsequent joins. |
-| 3️⃣ | Keeps resource packs loaded after disconnecting from servers. |
-| 4️⃣ | Reapplies cached packs when the game starts. |
+---
 
-## 📞 **Support**
+## **Functionality**
 
-For assistance, visit the [GitHub Repository](https://github.com/Furq07/resourcepackcached/issues) or join our [Discord Server](https://discord.gg/XhZzmvzPDV).
+**ResourcePackCached** works automatically in the background:
 
-## 🤝 **Partner**
+| Step | Description |
+|------|-------------|
+| 1 | Downloads and caches the server resource pack on the first join. |
+| 2 | Keeps the pack loaded after disconnecting. |
+| 3 | Skips reloading the pack when rejoining the same server. |
+| 4 | Reapplies the cached resource pack automatically on game startup. |
 
-<p align="center"> <a href="https://billing.revivenode.com/aff.php?aff=517"> <img src="https://versions.revivenode.com/resources/banner_wide_one.gif" alt="Partner GIF"> </a> </p> <p align="center"> Use code <b>FURQ</b> for 15% off your order! </p>
+---
+
+## **Support**
+
+Need help or want to report an issue?
+- Open an issue on the [GitHub repository](https://github.com/Furq07/resourcepackcached/issues)
+- Join the [Discord server](https://discord.gg/XhZzmvzPDV)
+
+---
+
+## **Partner**
+
+<p align="center">  
+  <a href="https://billing.revivenode.com/aff.php?aff=517">  
+    <img src="https://versions.revivenode.com/resources/banner_wide_one.gif" alt="Revivenode Banner">  
+  </a>  
+</p>  
+<p align="center"> Use code <strong>FURQ</strong> for 15% off your order! </p>
