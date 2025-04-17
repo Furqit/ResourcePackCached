@@ -12,3 +12,8 @@ stonecutter registerChiseled tasks.register("chiseledRunClient", stonecutter.chi
     group = "chiseled"
     ofTask("runClient")
 }
+
+stonecutter registerChiseled tasks.register("chiseledPublishMods", stonecutter.chiseled) {
+    group = "chiseled"
+    ofTask("publishMods")
+}

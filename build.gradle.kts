@@ -1,5 +1,14 @@
+import java.util.*
+
 plugins {
     id("dev.architectury.loom") version "1.7.+"
+    id("me.modmuss50.mod-publish-plugin") version "0.8.+"
+}
+
+val localProperties = Properties().apply {
+    rootProject.file("local.properties").takeIf { it.exists() }?.let {
+        load(it.inputStream())
+    }
 }
 
 class ModData {
@@ -152,4 +161,37 @@ fun <T> optionalProp(property: String, block: (String) -> T?): T? =
 
 fun isPropDefined(property: String): Boolean {
     return property(property)?.toString()?.isNotBlank() ?: false
+}
+
+publishMods {
+    file = tasks.remapJar.get().archiveFile
+    displayName = "${mod.name} ${mod.version}"
+    version = mcVersion
+    changelog = rootProject.file("CHANGELOG.md").readText()
+    type = STABLE
+    modLoaders.add(loader.loader)
+
+    val versions = listOf("1.20.1", "1.20.2", "1.20.3", "1.20.4", "1.20.5", "1.20.6", "1.21", "1.21.1", "1.21.2", "1.21.3", "1.21.4", "1.21.5")
+        .filter { ver ->
+            mc.dep.toString().split(" ")
+                .all { constraint ->
+                    when {
+                        constraint.startsWith(">=") -> stonecutter.compare(ver, constraint.substring(2)) >= 0
+                        constraint.startsWith("<=") -> stonecutter.compare(ver, constraint.substring(2)) <= 0
+                        else -> true
+                    }
+                }
+        }
+
+    modrinth {
+        projectId = "WdbPWi13"
+        accessToken = localProperties.getProperty("MODRINTH_TOKEN")
+        versions.forEach { minecraftVersions.add(it) }
+    }
+
+    curseforge {
+        projectId = "1150354"
+        accessToken = localProperties.getProperty("CURSEFORGE_TOKEN")
+        versions.forEach { minecraftVersions.add(it) }
+    }
 }
