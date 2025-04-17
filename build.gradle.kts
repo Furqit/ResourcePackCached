@@ -184,13 +184,13 @@ publishMods {
         }
 
     modrinth {
-        projectId = "WdbPWi13"
+        projectId = "d4phKsx2"
         accessToken = localProperties.getProperty("MODRINTH_TOKEN")
         versions.forEach { minecraftVersions.add(it) }
     }
 
     curseforge {
-        projectId = "1150354"
+        projectId = "1125284"
         accessToken = localProperties.getProperty("CURSEFORGE_TOKEN")
         versions.forEach { minecraftVersions.add(it) }
     }
