@@ -166,12 +166,12 @@ fun isPropDefined(property: String): Boolean {
 publishMods {
     file = tasks.remapJar.get().archiveFile
     displayName = "${mod.name} ${mod.version}"
-    version = mcVersion
+    version = "${mod.version}"
     changelog = rootProject.file("CHANGELOG.md").readText()
     type = STABLE
     modLoaders.add(loader.loader)
 
-    val versions = listOf("1.20.1", "1.20.2", "1.20.3", "1.20.4", "1.20.5", "1.20.6", "1.21", "1.21.1", "1.21.2", "1.21.3", "1.21.4", "1.21.5")
+    val versions = listOf("1.20.1", "1.20.2", "1.20.3", "1.20.4", "1.20.5", "1.20.6", "1.21", "1.21.1", "1.21.2", "1.21.3", "1.21.4", "1.21.5", "1.21.6", "1.21.7")
         .filter { ver ->
             mc.dep.toString().split(" ")
                 .all { constraint ->
