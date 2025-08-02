@@ -1,2 +1,2 @@
 ### Updates & Improvements:
-- Mod is now updated to 1.21.7
+- Mod is now updated to 1.21.8
