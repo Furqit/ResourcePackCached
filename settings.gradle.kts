@@ -1,5 +1,3 @@
-import dev.kikugie.stonecutter.StonecutterSettings
-
 pluginManagement {
     repositories {
         mavenCentral()
@@ -12,26 +10,22 @@ pluginManagement {
 }
 
 plugins {
-    id("dev.kikugie.stonecutter") version "0.4.+"
+    id("dev.kikugie.stonecutter") version "0.7.+"
 }
 
-extensions.configure<StonecutterSettings> {
-    kotlinController = true
-    centralScript = "build.gradle.kts"
-
-    shared {
+stonecutter {
+    create(rootProject) {
         fun mc(mcVersion: String, loaders: Iterable<String>) {
             for (loader in loaders) {
-                vers("$mcVersion-$loader", mcVersion)
+                version("$mcVersion-$loader", mcVersion)
             }
         }
 
         mc("1.20.1", listOf("fabric", "forge"))
         mc("1.20.2", listOf("fabric", "forge", "neoforge"))
         mc("1.20.4", listOf("fabric", "forge", "neoforge"))
-        vcsVersion("1.20.4-fabric")
+        vcsVersion = "1.20.4-fabric"
     }
-    create(rootProject)
 }
 
 rootProject.name = "ResourcePackCached"

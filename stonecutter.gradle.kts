@@ -1,19 +1,24 @@
 plugins {
     id("dev.kikugie.stonecutter")
 }
+
 stonecutter active "1.20.4-fabric" /* [SC] DO NOT EDIT */
 
-stonecutter registerChiseled tasks.register("chiseledBuild", stonecutter.chiseled) {
+tasks.register("chiseledBuild") {
     group = "chiseled"
-    ofTask("buildAndCollect")
+    dependsOn(stonecutter.tasks.named("buildAndCollect"))
 }
 
-stonecutter registerChiseled tasks.register("chiseledRunClient", stonecutter.chiseled) {
+tasks.register("chiseledRunClient") {
     group = "chiseled"
-    ofTask("runClient")
+    dependsOn(stonecutter.tasks.named("runClient"))
 }
 
-stonecutter registerChiseled tasks.register("chiseledPublishMods", stonecutter.chiseled) {
-    group = "chiseled"
-    ofTask("publishMods")
+tasks.register("publishAll") {
+    group = "publishing"
+    dependsOn(stonecutter.tasks.named("publishMods"))
+}
+
+stonecutter.tasks {
+    order("publishMods")
 }

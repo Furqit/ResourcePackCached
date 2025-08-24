@@ -1,7 +1,7 @@
 import java.util.*
 
 plugins {
-    id("dev.architectury.loom") version "1.7.+"
+    id("dev.architectury.loom") version "1.11.+"
     id("me.modmuss50.mod-publish-plugin") version "0.8.+"
 }
 
@@ -47,9 +47,9 @@ version = "${mod.version}+${mc.version}-${loader.loader}"
 group = mod.group
 base { archivesName.set(mod.id) }
 
-stonecutter.const("fabric", loader.isFabric)
-stonecutter.const("neoforge", loader.isNeoForge)
-stonecutter.const("forge", loader.isForge)
+stonecutter.constants["fabric"] = loader.isFabric
+stonecutter.constants["neoforge"] = loader.isNeoForge
+stonecutter.constants["forge"] = loader.isForge
 
 loom {
     silentMojangMappingsLicense()
@@ -155,14 +155,6 @@ tasks.register<Copy>("buildAndCollect") {
     dependsOn("build")
 }
 
-@Suppress("TYPE_MISMATCH", "UNRESOLVED_REFERENCE")
-fun <T> optionalProp(property: String, block: (String) -> T?): T? =
-    findProperty(property)?.toString()?.takeUnless { it.isBlank() }?.let(block)
-
-fun isPropDefined(property: String): Boolean {
-    return property(property)?.toString()?.isNotBlank() ?: false
-}
-
 publishMods {
     file = tasks.remapJar.get().archiveFile
     displayName = "${mod.name} ${mod.version}"
@@ -170,28 +162,28 @@ publishMods {
     changelog = rootProject.file("CHANGELOG.md").readText()
     type = STABLE
     modLoaders.add(loader.loader)
-
-    val versions = listOf("1.20.1", "1.20.2", "1.20.3", "1.20.4", "1.20.5", "1.20.6", "1.21", "1.21.1", "1.21.2", "1.21.3", "1.21.4", "1.21.5", "1.21.6", "1.21.7", "1.21.8")
-        .filter { ver ->
-            mc.dep.toString().split(" ")
-                .all { constraint ->
-                    when {
-                        constraint.startsWith(">=") -> stonecutter.compare(ver, constraint.substring(2)) >= 0
-                        constraint.startsWith("<=") -> stonecutter.compare(ver, constraint.substring(2)) <= 0
-                        else -> true
-                    }
-                }
-        }
+    val dep = mc.dep.toString()
+    val lower = """>=([0-9.]+)""".toRegex().find(dep)?.groupValues?.get(1)
+    val upper = """><=([0-9.]+)""".toRegex().find(dep)?.groupValues?.get(1)
 
     modrinth {
         projectId = "d4phKsx2"
         accessToken = localProperties.getProperty("MODRINTH_TOKEN")
-        versions.forEach { minecraftVersions.add(it) }
+        minecraftVersionRange {
+            start = lower ?: "latest"
+            end = upper ?: "latest"
+        }
+        announcementTitle = "Download from Modrinth"
     }
 
     curseforge {
         projectId = "1125284"
+        projectSlug = "resourcepackcached"
         accessToken = localProperties.getProperty("CURSEFORGE_TOKEN")
-        versions.forEach { minecraftVersions.add(it) }
+        minecraftVersionRange {
+            start = lower ?: "latest"
+            end = upper ?: "latest"
+        }
+        announcementTitle = "Download from CurseForge"
     }
 }

@@ -81,21 +81,21 @@ abstract class DownloadedPackSourceMixin {
     @Inject(method = "setServerPack", at = @At("HEAD"), cancellable = true)
     public void onSetServerPack(File file, PackSource packSource, CallbackInfoReturnable<CompletableFuture<Void>> cir) {
         //? if <1.20.2 {
-        Pack.ResourcesSupplier resourcesSupplier = (string) ->
+        /^Pack.ResourcesSupplier resourcesSupplier = (string) ->
                 new FilePackResources(string, file, false);
         Pack.Info info = Pack.readPackInfo("server", resourcesSupplier);
-        //?} else {
-        /^Pack.ResourcesSupplier resourcesSupplier = new FilePackResources.FileResourcesSupplier(file, false);
+        ^///?} else {
+        Pack.ResourcesSupplier resourcesSupplier = new FilePackResources.FileResourcesSupplier(file, false);
         int i = SharedConstants.getCurrentVersion().getPackVersion(PackType.CLIENT_RESOURCES);
         Pack.Info info = Pack.readPackInfo("server", resourcesSupplier, i);
-        ^///?}
+        //?}
         if (info == null) {
             LOGGER.error("Invalid pack metadata at {}", file);
             cir.setReturnValue(CompletableFuture.failedFuture(new IllegalArgumentException("Invalid pack metadata at " + file)));
         } else {
             LOGGER.info("Applying server pack {}", file);
 
-            Pack newServerPack = Pack.create("server", SERVER_NAME, true, resourcesSupplier, info, /^? if <1.20.2 {^/PackType.CLIENT_RESOURCES,/^?}^/ Pack.Position.TOP, true, packSource);
+            Pack newServerPack = Pack.create("server", SERVER_NAME, true, resourcesSupplier, info, /^? if <1.20.2 {^//^PackType.CLIENT_RESOURCES,^//^?}^/ Pack.Position.TOP, true, packSource);
             HashMap<UUID, Path> cachedPacks = CachingUtils.readCacheFile();
             final UUID SUBSTITUTE_UUID = UUID.fromString("b700a6a9-58e1-4e5b-a995-ead5edc8f72a");
             Path resourcePack = cachedPacks.get(SUBSTITUTE_UUID);
