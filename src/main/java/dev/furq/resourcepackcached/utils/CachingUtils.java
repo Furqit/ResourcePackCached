@@ -27,10 +27,8 @@ public class CachingUtils {
     public static final File GAME_DIR = /*? if fabric {*/FabricLoader.getInstance().getGameDir().toFile()/*?}*//*? if forge {*//*FMLPaths.GAMEDIR.get().toFile()*//*?}*//*? if neoforge {*//*FMLPaths.GAMEDIR.get().toFile()*//*?}*/;
     public static final File CACHE_FILE = new File(GAME_DIR, "rpc-data.json");
     public static final Logger LOGGER = LogManager.getLogger(CachingUtils.class);
-    //? if >1.20.2 {
     public static boolean isProcessing = false;
     public static boolean isJoin = false;
-    //?}
 
     public static void writeCacheFile(HashMap<UUID, Path> packs) {
         try {
@@ -79,10 +77,8 @@ public class CachingUtils {
         return packs;
     }
 
-    //? if >1.20.2 {
     public static boolean isCachedResourcePack(UUID uuid, Path path) {
         HashMap<UUID, Path> cachedPacks = readCacheFile();
         return cachedPacks.containsKey(uuid) && cachedPacks.get(uuid).equals(path);
     }
-    //?}
 }

@@ -23,7 +23,6 @@ class ModData {
     val modrinth = property("mod.modrinth")
     val curseforge = property("mod.curseforge")
     val discord = property("mod.discord")
-    val mixins = property("mod.mixins")
 }
 
 class LoaderData {
@@ -107,7 +106,6 @@ tasks.processResources {
         put("modrinth", mod.modrinth)
         put("curseforge", mod.curseforge)
         put("discord", mod.discord)
-        put("mixins", mod.mixins)
         put("loader", loader.loader)
 
         if (loader.isForge) {
@@ -120,12 +118,9 @@ tasks.processResources {
 
     props.forEach(inputs::property)
 
-    filesMatching("rpc.mixins.json") {
-        expand(props)
-    }
     if (loader.isFabric) {
         filesMatching("fabric.mod.json") { expand(props) }
-        exclude("META-INF/mods.toml", "META-INF/neoforge.mods.toml")
+        exclude("META-INF/mods.toml", "META-INF/neoforge.mods.toml", "pack.mcmeta")
     }
     if (loader.isNeoForge) {
         filesMatching("META-INF/mods.toml") { expand(props) }
@@ -135,9 +130,6 @@ tasks.processResources {
     if (loader.isForge) {
         filesMatching("META-INF/mods.toml") { expand(props) }
         exclude("fabric.mod.json")
-    }
-    if (loader.isFabric) {
-        exclude("pack.mcmeta")
     }
 }
 
