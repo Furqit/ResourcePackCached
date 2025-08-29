@@ -1,0 +1,10 @@
+accessWidener v2 named
+accessible class net/minecraft/client/resources/server/ServerPackManager$ServerPackData
+accessible field net/minecraft/client/resources/server/ServerPackManager$ServerPackData id Ljava/util/UUID;
+accessible field net/minecraft/client/resources/server/ServerPackManager$ServerPackData path Ljava/nio/file/Path;
+accessible field net/minecraft/client/resources/server/ServerPackManager$ServerPackData activationStatus Lnet/minecraft/client/resources/server/ServerPackManager$ActivationStatus;
+accessible class net/minecraft/client/resources/server/ServerPackManager$ActivationStatus
+accessible field net/minecraft/client/resources/server/ServerPackManager packs Ljava/util/List;
+accessible field net/minecraft/client/resources/server/ServerPackManager packPromptStatus Lnet/minecraft/client/resources/server/ServerPackManager$PackPromptStatus;
+accessible method net/minecraft/client/resources/server/DownloadedPackSource startReload (Lnet/minecraft/client/resources/server/PackReloadConfig$Callbacks;)V
+accessible field net/minecraft/client/resources/server/DownloadedPackSource manager Lnet/minecraft/client/resources/server/ServerPackManager;

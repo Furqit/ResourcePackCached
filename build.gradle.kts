@@ -64,6 +64,7 @@ loom {
     }
 
     runConfigs.remove(runConfigs["server"])
+    accessWidenerPath = parent?.file("src/main/resources/rpc.accesswidener")
 }
 
 repositories {
@@ -88,7 +89,7 @@ dependencies {
 }
 
 java {
-    val java = JavaVersion.VERSION_17
+    val java = if (stonecutter.eval(mcVersion, ">=1.20.5")) JavaVersion.VERSION_21 else JavaVersion.VERSION_17
     sourceCompatibility = java
     targetCompatibility = java
 }
@@ -120,16 +121,22 @@ tasks.processResources {
 
     if (loader.isFabric) {
         filesMatching("fabric.mod.json") { expand(props) }
-        exclude("META-INF/mods.toml", "META-INF/neoforge.mods.toml", "pack.mcmeta")
+        exclude(
+            "META-INF/mods.toml",
+            "META-INF/neoforge.mods.toml",
+            "META-INF/accesstransformer.cfg",
+            "META-INF/accesstransformer-neo.cfg",
+            "pack.mcmeta"
+        )
     }
     if (loader.isNeoForge) {
         filesMatching("META-INF/mods.toml") { expand(props) }
         filesMatching("META-INF/neoforge.mods.toml") { expand(props) }
-        exclude("fabric.mod.json")
+        exclude("fabric.mod.json", "rpc.accesswidener", "META-INF/accesstransformer.cfg")
     }
     if (loader.isForge) {
         filesMatching("META-INF/mods.toml") { expand(props) }
-        exclude("fabric.mod.json")
+        exclude("fabric.mod.json", "rpc.accesswidener", "META-INF/accesstransformer-neo.cfg")
     }
 }
 
@@ -155,8 +162,8 @@ publishMods {
     type = STABLE
     modLoaders.add(loader.loader)
     val dep = mc.dep.toString()
-    val lower = """>=([0-9.]+)""".toRegex().find(dep)?.groupValues?.get(1)
-    val upper = """><=([0-9.]+)""".toRegex().find(dep)?.groupValues?.get(1)
+    val lower = """>=\s*([0-9.]+)""".toRegex().find(dep)?.groupValues?.get(1)
+    val upper = """<=\s*([0-9.]+)""".toRegex().find(dep)?.groupValues?.get(1)
 
     modrinth {
         projectId = "d4phKsx2"

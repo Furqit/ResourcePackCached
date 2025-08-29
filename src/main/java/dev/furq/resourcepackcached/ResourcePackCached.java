@@ -1,7 +1,6 @@
 package dev.furq.resourcepackcached;
 
 //? if fabric {
-import it.unimi.dsi.fastutil.Hash;
 import net.fabricmc.api.ClientModInitializer;
 //?} elif forge {
 /*import net.minecraftforge.fml.common.Mod;
@@ -11,32 +10,60 @@ import net.fabricmc.api.ClientModInitializer;
 import dev.furq.resourcepackcached.utils.CachingUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.server.DownloadedPackSource;
+import net.minecraft.client.resources.server.PackReloadConfig;
+import net.minecraft.client.resources.server.ServerPackManager;
+import org.jetbrains.annotations.NotNull;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
-//? if forge || neoforge {
+//? if forge || neoforge
 /*@Mod("rpc")*/
 public class ResourcePackCached /*? if fabric {*/ implements ClientModInitializer/*?}*/ {
 
     //? if fabric {
     @Override
     public void onInitializeClient() {
-        //?} else {
-        /*public ResourcePackCached() {
-         *///?}
-        HashMap<UUID, Path> cachedPacks = CachingUtils.readCacheFile();
-        if (!cachedPacks.isEmpty()) {
-            try {
-                DownloadedPackSource downloadedPackSource = Minecraft.getInstance().getDownloadedPackSource();
-                for (HashMap.Entry<UUID, Path> entry : cachedPacks.entrySet()) {
-                    if (Files.exists(entry.getValue())) {
-                        downloadedPackSource.pushLocalPack(entry.getKey(), entry.getValue());
-                    }
+    //?} else {
+    /*public ResourcePackCached() {*/
+    //?}
+        Map<UUID, Path> cachedPacks = CachingUtils.readCacheFile();
+        if (cachedPacks.isEmpty()) return;
+
+        try {
+            CachingUtils.isStartup = true;
+            DownloadedPackSource packSource = Minecraft.getInstance().getDownloadedPackSource();
+            packSource.manager.packPromptStatus = ServerPackManager.PackPromptStatus.ALLOWED;
+
+            cachedPacks.forEach((uuid, path) -> {
+                if (Files.exists(path)) {
+                    packSource.pushLocalPack(uuid, path);
                 }
-            } catch (Exception ignored) {
-            }
+            });
+
+            packSource.manager.packs.forEach(pack ->
+                    pack.activationStatus = ServerPackManager.ActivationStatus.ACTIVE
+            );
+
+            packSource.startReload(new PackReloadConfig.Callbacks() {
+                @Override
+                public @NotNull List<PackReloadConfig.IdAndPath> packsToLoad() {
+                    return packSource.manager.packs.stream()
+                            .map(pack -> new PackReloadConfig.IdAndPath(pack.id, pack.path))
+                            .toList();
+                }
+                @Override
+                public void onSuccess() {}
+                @Override
+                public void onFailure(boolean bl) {}
+            });
+        } catch (Exception e) {
+            CachingUtils.LOGGER.warn("Failed to reapply cached packs", e);
+        } finally {
+            CachingUtils.isStartup = false;
         }
     }
 }

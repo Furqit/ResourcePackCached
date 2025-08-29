@@ -1,20 +1,25 @@
 package dev.furq.resourcepackcached.mixin;
 
 import dev.furq.resourcepackcached.utils.CachingUtils;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.server.DownloadedPackSource;
-import net.minecraft.client.resources.server.PackReloadConfig;
-import net.minecraft.server.packs.repository.Pack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import java.util.List;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import java.util.concurrent.CompletableFuture;
 
 @Mixin(DownloadedPackSource.class)
-public class DownloadedPackSourceMixin {
-    @Inject(method = "loadRequestedPacks", at = @At("RETURN"))
-    private void loadRequestedPacks(List<PackReloadConfig.IdAndPath> list, CallbackInfoReturnable<List<Pack>> cir) {
-        CachingUtils.isProcessing = false;
+public abstract class DownloadedPackSourceMixin {
+
+    @Inject(method = "cleanupAfterDisconnect", at = @At("HEAD"), cancellable = true)
+    public void onCleanupAfterDisconnect(CallbackInfo ci) {
+        ci.cancel();
+    }
+
+    @Redirect(method = "startReload", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;reloadResourcePacks()Ljava/util/concurrent/CompletableFuture;"))
+    public CompletableFuture<Void> onStartReload(Minecraft instance) {
+        return CachingUtils.isStartup ? CompletableFuture.completedFuture(null) : instance.reloadResourcePacks();
     }
 }
