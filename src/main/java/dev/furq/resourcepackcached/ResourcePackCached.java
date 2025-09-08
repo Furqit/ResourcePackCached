@@ -31,39 +31,34 @@ public class ResourcePackCached /*? if fabric {*/ implements ClientModInitialize
     /*public ResourcePackCached() {*/
     //?}
         Map<UUID, Path> cachedPacks = CachingUtils.readCacheFile();
-        if (cachedPacks.isEmpty()) return;
+        if (!cachedPacks.isEmpty()) {
+            try {
+                CachingUtils.isStartup = true;
+                DownloadedPackSource packSource = Minecraft.getInstance().getDownloadedPackSource();
+                packSource.manager.packPromptStatus = ServerPackManager.PackPromptStatus.ALLOWED;
 
-        try {
-            CachingUtils.isStartup = true;
-            DownloadedPackSource packSource = Minecraft.getInstance().getDownloadedPackSource();
-            packSource.manager.packPromptStatus = ServerPackManager.PackPromptStatus.ALLOWED;
+                cachedPacks.entrySet().stream()
+                    .filter(entry -> Files.exists(entry.getValue()))
+                    .forEach(entry -> packSource.pushLocalPack(entry.getKey(), entry.getValue()));
 
-            cachedPacks.forEach((uuid, path) -> {
-                if (Files.exists(path)) {
-                    packSource.pushLocalPack(uuid, path);
-                }
-            });
+                packSource.manager.packs.forEach(pack -> pack.activationStatus = ServerPackManager.ActivationStatus.ACTIVE);
 
-            packSource.manager.packs.forEach(pack ->
-                    pack.activationStatus = ServerPackManager.ActivationStatus.ACTIVE
-            );
-
-            packSource.startReload(new PackReloadConfig.Callbacks() {
-                @Override
-                public @NotNull List<PackReloadConfig.IdAndPath> packsToLoad() {
-                    return packSource.manager.packs.stream()
+                packSource.startReload(new PackReloadConfig.Callbacks() {
+                    @Override
+                    public @NotNull List<PackReloadConfig.IdAndPath> packsToLoad() {
+                        return packSource.manager.packs.stream()
                             .map(pack -> new PackReloadConfig.IdAndPath(pack.id, pack.path))
                             .toList();
-                }
-                @Override
-                public void onSuccess() {}
-                @Override
-                public void onFailure(boolean bl) {}
-            });
-        } catch (Exception e) {
-            CachingUtils.LOGGER.warn("Failed to reapply cached packs", e);
-        } finally {
-            CachingUtils.isStartup = false;
+                    }
+                    @Override
+                    public void onSuccess() {}
+                    @Override
+                    public void onFailure(boolean bl) {}
+                });
+            } catch (Exception ignored) {
+            } finally {
+                CachingUtils.isStartup = false;
+            }
         }
     }
 }

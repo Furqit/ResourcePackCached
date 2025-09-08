@@ -1,14 +1,16 @@
 package dev.furq.resourcepackcached.utils;
 
 //? if fabric {
-
 import net.fabricmc.loader.api.FabricLoader;
 //?} elif forge {
 /*import net.minecraftforge.fml.loading.FMLPaths;
  *///?} elif neoforge {
 /*import net.neoforged.fml.loading.FMLPaths;
  *///?}
-import com.google.gson.*;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -18,81 +20,62 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.HashMap;
+import java.util.UUID;
 
 public class CachingUtils {
 
+    public static final File GAME_DIR = /*? if fabric {*/ FabricLoader.getInstance().getGameDir().toFile() /*?}*//*? if forge || neoforge {*//* FMLPaths.GAMEDIR.get().toFile() *//*?}*/;
     public static final File CONFIG_DIR = /*? if fabric {*/ FabricLoader.getInstance().getConfigDir().toFile() /*?}*//*? if forge || neoforge {*//* FMLPaths.CONFIGDIR.get().toFile() *//*?}*/;
     public static final File CACHE_FILE = new File(CONFIG_DIR, "rpc-data.json");
     public static final Logger LOGGER = LogManager.getLogger("ResourcePackCached");
-
     public static boolean isStartup = false;
-    public static boolean shouldClearPacks = false;
-    public static String cacheServer = null;
 
-    public static void writeCacheFile(Map<UUID, Path> packs) {
-        JsonObject root = new JsonObject();
-        JsonArray packsArray = new JsonArray();
-
-        packs.forEach((uuid, path) -> {
-            if (Files.exists(path)) {
-                JsonObject packObj = new JsonObject();
-                packObj.addProperty("uuid", uuid.toString());
-                packObj.addProperty("path", path.toString());
-                packsArray.add(packObj);
-            }
-        });
-
-        root.addProperty("server", cacheServer == null ? "" : cacheServer);
-        root.add("packs", packsArray);
-
+    public static void writeCacheFile(HashMap<UUID, Path> packs) {
         try {
-            Files.writeString(CACHE_FILE.toPath(), root.toString(), StandardCharsets.UTF_8);
+            JsonObject root = new JsonObject();
+            JsonArray packsArray = new JsonArray();
+
+            for (HashMap.Entry<UUID, Path> entry : packs.entrySet()) {
+                if (Files.exists(entry.getValue())) {
+                    JsonObject packObj = new JsonObject();
+                    packObj.addProperty("uuid", entry.getKey().toString());
+                    packObj.addProperty("path", entry.getValue().toString());
+                    packsArray.add(packObj);
+                }
+            }
+
+            root.add("packs", packsArray);
+            FileUtils.writeStringToFile(CACHE_FILE, root.toString(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             LOGGER.error("Failed to write cache file", e);
         }
     }
 
-    public static Map<UUID, Path> readCacheFile() {
-        Map<UUID, Path> packs = new HashMap<>();
-        if (!CACHE_FILE.exists()) return packs;
-
-        try {
-            String content = Files.readString(CACHE_FILE.toPath(), StandardCharsets.UTF_8);
-            if (content.isEmpty()) return packs;
-
-            JsonObject root = JsonParser.parseString(content).getAsJsonObject();
-
-            if (root.has("server")) {
-                cacheServer = root.get("server").getAsString();
-            }
-
-            JsonArray packsArray = root.getAsJsonArray("packs");
-            if (packsArray != null) {
-                for (JsonElement el : packsArray) {
-                    JsonObject packObj = el.getAsJsonObject();
-                    UUID uuid = UUID.fromString(packObj.get("uuid").getAsString());
-                    Path path = Paths.get(packObj.get("path").getAsString());
-                    if (Files.exists(path)) {
-                        packs.put(uuid, path);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            LOGGER.error("Failed to read cache file", e);
-        }
-        return packs;
-    }
-
-    public static void clearCache() {
-        cacheServer = null;
+    public static HashMap<UUID, Path> readCacheFile() {
+        HashMap<UUID, Path> packs = new HashMap<>();
         if (CACHE_FILE.exists()) {
             try {
-                Files.delete(CACHE_FILE.toPath());
+                String content = FileUtils.readFileToString(CACHE_FILE, StandardCharsets.UTF_8);
+                if (!content.isEmpty()) {
+                    JsonObject root = JsonParser.parseString(content).getAsJsonObject();
+                    JsonArray packsArray = root.getAsJsonArray("packs");
+                    if (packsArray != null) {
+                        for (int i = 0; i < packsArray.size(); i++) {
+                            JsonObject packObj = packsArray.get(i).getAsJsonObject();
+                            UUID uuid = UUID.fromString(packObj.get("uuid").getAsString());
+                            Path path = Paths.get(packObj.get("path").getAsString());
+                            if (Files.exists(path)) {
+                                packs.put(uuid, path);
+                            }
+                        }
+                    }
+                }
             } catch (IOException e) {
-                LOGGER.warn("Failed to clear cache file", e);
+                LOGGER.error("Failed to read cache file", e);
             }
         }
+        return packs;
     }
 
     public static boolean isCachedResourcePack(UUID uuid) {

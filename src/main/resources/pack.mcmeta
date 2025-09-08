@@ -1,6 +1,6 @@
 {
   "pack": {
     "pack_format": 15,
-    "description": "Optimizes server resource pack handling by caching, reusing across sessions, and eliminating redundant loading and unloading."
+    "description": "Keeps server resource packs loaded, so they don't need to be reloaded when you rejoin."
   }
 }
