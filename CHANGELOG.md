@@ -1,2 +1,2 @@
 ### Updates & Improvements
-- Resolved an issue where outdated resource packs were not properly unloaded when a new resource pack update was applied.
+- Added hash comparison to cached packs when the hash changes for the same UUID, ensuring updates are applied correctly.

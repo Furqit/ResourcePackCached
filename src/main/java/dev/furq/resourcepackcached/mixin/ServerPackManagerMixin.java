@@ -42,10 +42,10 @@ abstract class ServerPackManagerMixin {
             isNewSequence = false;
         }
         if (hashCode != null) {
-            File downloadPath = new File(CachingUtils.GAME_DIR, "downloads/" + id + "/" + hashCode);
-            latestPacks.put(id, downloadPath.toPath());
+            Path downloadPath = new File(CachingUtils.GAME_DIR, "downloads/" + id + "/" + hashCode).toPath();
+            latestPacks.put(id, downloadPath);
 
-            if (CachingUtils.isCachedResourcePack(id)) {
+            if (CachingUtils.isCachedResourcePack(id, hashCode)) {
                 this.packLoadFeedback.reportFinalResult(id, PackLoadFeedback.FinalResult.APPLIED);
                 this.registerForUpdate();
                 ci.cancel();

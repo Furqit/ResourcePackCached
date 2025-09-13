@@ -7,13 +7,13 @@ import net.fabricmc.loader.api.FabricLoader;
  *///?} elif neoforge {
 /*import net.neoforged.fml.loading.FMLPaths;
  *///?}
+import com.google.common.hash.HashCode;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -78,7 +78,8 @@ public class CachingUtils {
         return packs;
     }
 
-    public static boolean isCachedResourcePack(UUID uuid) {
-        return readCacheFile().containsKey(uuid);
+    public static boolean isCachedResourcePack(UUID uuid, HashCode hashCode) {
+        Path cachedPath = readCacheFile().get(uuid);
+        return cachedPath != null && cachedPath.getFileName().toString().equals(hashCode.toString());
     }
 }
