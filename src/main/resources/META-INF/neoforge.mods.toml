@@ -21,7 +21,7 @@ side="CLIENT"
 [[dependencies.${id}]]
 modId="minecraft"
 type="required"
-versionRange="${mcdep}"
+versionRange="[1.20.5,1.21.4]"
 ordering="NONE"
 side="CLIENT"
 
