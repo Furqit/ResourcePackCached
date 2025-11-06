@@ -1,7 +1,7 @@
 import java.util.*
 
 plugins {
-    id("dev.architectury.loom") version "1.11.+"
+    id("dev.architectury.loom") version "1.13.+"
     id("me.modmuss50.mod-publish-plugin") version "0.8.+"
 }
 
@@ -29,7 +29,6 @@ class LoaderData {
     val loader = loom.platform.get().name.lowercase()
     val isFabric = loader == "fabric"
     val isNeoForge = loader == "neoforge"
-    val isForge = loader == "forge"
 }
 
 class McData {
@@ -48,7 +47,6 @@ base { archivesName.set(mod.id) }
 
 stonecutter.constants["fabric"] = loader.isFabric
 stonecutter.constants["neoforge"] = loader.isNeoForge
-stonecutter.constants["forge"] = loader.isForge
 
 loom {
     silentMojangMappingsLicense()
@@ -56,11 +54,6 @@ loom {
     runConfigs.all {
         ideConfigGenerated(stonecutter.current.isActive)
         runDir = "../../run"
-    }
-    if (loader.isForge) {
-        forge {
-            mixinConfig("rpc.mixins.json")
-        }
     }
 
     runConfigs.remove(runConfigs["server"])
@@ -83,8 +76,6 @@ dependencies {
         modImplementation("net.fabricmc:fabric-loader:${property("deps.fabric")}")
     } else if (loader.isNeoForge) {
         "neoForge"("net.neoforged:neoforge:${findProperty("deps.neoforge")}")
-    } else if (loader.isForge) {
-        "forge"("net.minecraftforge:forge:${findProperty("deps.forge")}")
     }
 }
 
@@ -109,9 +100,6 @@ tasks.processResources {
         put("discord", mod.discord)
         put("loader", loader.loader)
 
-        if (loader.isForge) {
-            put("forgeConstraint", "[${findProperty("deps.forge")},)")
-        }
         if (loader.isNeoForge) {
             put("forgeConstraint", "[${findProperty("deps.neoforge")},)")
         }
@@ -121,22 +109,11 @@ tasks.processResources {
 
     if (loader.isFabric) {
         filesMatching("fabric.mod.json") { expand(props) }
-        exclude(
-            "META-INF/mods.toml",
-            "META-INF/neoforge.mods.toml",
-            "META-INF/accesstransformer.cfg",
-            "META-INF/accesstransformer-neo.cfg",
-            "pack.mcmeta"
-        )
+        exclude("META-INF/neoforge.mods.toml", "pack.mcmeta")
     }
     if (loader.isNeoForge) {
-        filesMatching("META-INF/mods.toml") { expand(props) }
         filesMatching("META-INF/neoforge.mods.toml") { expand(props) }
-        exclude("fabric.mod.json", "rpc.accesswidener", "META-INF/accesstransformer.cfg")
-    }
-    if (loader.isForge) {
-        filesMatching("META-INF/mods.toml") { expand(props) }
-        exclude("fabric.mod.json", "rpc.accesswidener", "META-INF/accesstransformer-neo.cfg")
+        exclude("fabric.mod.json", "rpc.accesswidener")
     }
 }
 
@@ -172,7 +149,6 @@ publishMods {
             start = lower ?: "latest"
             end = upper ?: "latest"
         }
-        announcementTitle = "Download from Modrinth"
     }
 
     curseforge {
@@ -183,6 +159,5 @@ publishMods {
             start = lower ?: "latest"
             end = upper ?: "latest"
         }
-        announcementTitle = "Download from CurseForge"
     }
 }

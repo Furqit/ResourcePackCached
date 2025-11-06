@@ -2,9 +2,7 @@ package dev.furq.resourcepackcached;
 
 //? if fabric {
 import net.fabricmc.api.ClientModInitializer;
-//?} elif forge {
-/*import net.minecraftforge.fml.common.Mod;
-*///?} elif neoforge {
+//?} elif neoforge {
 /*import net.neoforged.fml.common.Mod;
 *///?}
 import dev.furq.resourcepackcached.utils.CachingUtils;
@@ -20,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-//? if forge || neoforge
+//? if neoforge
 /*@Mod("rpc")*/
 public class ResourcePackCached /*? if fabric {*/ implements ClientModInitializer/*?}*/ {
 

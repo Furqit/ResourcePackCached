@@ -1,2 +1,3 @@
 ### Updates & Improvements
-- Added hash comparison to cached packs when the hash changes for the same UUID, ensuring updates are applied correctly.
+- Updated Fabric to version 1.21.9–10
+- Dropped support for Forge and NeoForge *(may reintroduce NeoForge support in the future)*

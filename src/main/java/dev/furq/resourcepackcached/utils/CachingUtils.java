@@ -2,9 +2,7 @@ package dev.furq.resourcepackcached.utils;
 
 //? if fabric {
 import net.fabricmc.loader.api.FabricLoader;
-//?} elif forge {
-/*import net.minecraftforge.fml.loading.FMLPaths;
- *///?} elif neoforge {
+//?} elif neoforge {
 /*import net.neoforged.fml.loading.FMLPaths;
  *///?}
 import com.google.common.hash.HashCode;
@@ -25,8 +23,8 @@ import java.util.UUID;
 
 public class CachingUtils {
 
-    public static final File GAME_DIR = /*? if fabric {*/ FabricLoader.getInstance().getGameDir().toFile() /*?}*//*? if forge || neoforge {*//* FMLPaths.GAMEDIR.get().toFile() *//*?}*/;
-    public static final File CONFIG_DIR = /*? if fabric {*/ FabricLoader.getInstance().getConfigDir().toFile() /*?}*//*? if forge || neoforge {*//* FMLPaths.CONFIGDIR.get().toFile() *//*?}*/;
+    public static final File GAME_DIR = /*? if fabric {*/ FabricLoader.getInstance().getGameDir().toFile() /*?}*//*? if neoforge {*//* FMLPaths.GAMEDIR.get().toFile() *//*?}*/;
+    public static final File CONFIG_DIR = /*? if fabric {*/ FabricLoader.getInstance().getConfigDir().toFile() /*?}*//*? if neoforge {*//* FMLPaths.CONFIGDIR.get().toFile() *//*?}*/;
     public static final File CACHE_FILE = new File(CONFIG_DIR, "rpc-data.json");
     public static final Logger LOGGER = LogManager.getLogger("ResourcePackCached");
     public static boolean isStartup = false;
