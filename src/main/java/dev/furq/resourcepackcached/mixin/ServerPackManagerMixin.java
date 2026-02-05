@@ -46,7 +46,6 @@ abstract class ServerPackManagerMixin {
             latestPacks.put(id, downloadPath);
 
             if (CachingUtils.isCachedResourcePack(id, hashCode)) {
-                this.packLoadFeedback.reportFinalResult(id, PackLoadFeedback.FinalResult.APPLIED);
                 this.registerForUpdate();
                 ci.cancel();
             }

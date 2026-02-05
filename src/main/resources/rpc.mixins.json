@@ -8,6 +8,7 @@
   },
   "client": [
     "DownloadedPackSourceMixin",
-    "ServerPackManagerMixin"
+    "ServerPackManagerMixin",
+    "ResourcePackHandshakeMixin"
   ]
 }
