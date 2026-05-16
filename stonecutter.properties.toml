@@ -1,0 +1,16 @@
+# See https://stonecutter.kikugie.dev/wiki/config/properties#centralized-properties
+mod.id = "rpc"
+mod.name = "ResourcePackCached"
+mod.group = "dev.furq"
+mod.version = "1.2.6"
+
+deps.fabric_loader = "0.19.2"
+loomx.loom_version = "1.16-SNAPSHOT"
+
+["1.20.4"]
+mod.mc_compat = ">=1.20.3 <=1.21.11"
+mod.mc_releases = ["1.20.3", "1.20.4", "1.20.5", "1.20.6", "1.21", "1.21.1", "1.21.2", "1.21.3", "1.21.4", "1.21.5", "1.21.6", "1.21.7", "1.21.8", "1.21.9", "1.21.10", "1.21.11"]
+
+["26.1"]
+mod.mc_compat = ">=26.1 <=26.1.2"
+mod.mc_releases = ["26.1", "26.1.1", "26.1.2"]

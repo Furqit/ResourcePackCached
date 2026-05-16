@@ -1,2 +1,2 @@
 ### Updates & Improvements
-- Aggressive server resource pack check compatibility.
+- Updated to support 26.1.x.

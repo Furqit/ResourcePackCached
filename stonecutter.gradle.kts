@@ -2,7 +2,7 @@ plugins {
     id("dev.kikugie.stonecutter")
 }
 
-stonecutter active "1.20.4-fabric" /* [SC] DO NOT EDIT */
+stonecutter active "26.1"
 
 tasks.register("chiseledBuild") {
     group = "chiseled"
@@ -29,6 +29,14 @@ tasks.register("publishCurseforgeAll") {
     dependsOn(stonecutter.tasks.named("publishCurseforge"))
 }
 
-stonecutter.tasks {
-    order("publishMods")
+stonecutter parameters {
+    swaps["mod_version"] = "\"${property("mod.version")}\";"
+    swaps["minecraft"] = "\"${node.metadata.version}\";"
+    constants["release"] = property("mod.id") != "rpc"
+
+    replacements {
+        string(current.parsed >= "26.1") {
+            replace("classTweaker v1 named", "classTweaker v1 official")
+        }
+    }
 }

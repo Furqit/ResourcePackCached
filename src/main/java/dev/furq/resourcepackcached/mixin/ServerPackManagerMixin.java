@@ -36,16 +36,16 @@ abstract class ServerPackManagerMixin {
     abstract void registerForUpdate();
 
     @Inject(method = "pushPack", at = @At("HEAD"), cancellable = true)
-    public void onPushPack(UUID id, URL url, @Nullable HashCode hashCode, CallbackInfo ci) {
+    public void onPushPack(UUID id, URL url, @Nullable HashCode hash, CallbackInfo ci) {
         if (isNewSequence) {
             latestPacks.clear();
             isNewSequence = false;
         }
-        if (hashCode != null) {
-            Path downloadPath = new File(CachingUtils.GAME_DIR, "downloads/" + id + "/" + hashCode).toPath();
+        if (hash != null) {
+            Path downloadPath = new File(CachingUtils.GAME_DIR, "downloads/" + id + "/" + hash).toPath();
             latestPacks.put(id, downloadPath);
 
-            if (CachingUtils.isCachedResourcePack(id, hashCode)) {
+            if (CachingUtils.isCachedResourcePack(id, hash)) {
                 this.packLoadFeedback.reportUpdate(id, PackLoadFeedback.Update.ACCEPTED);
                 this.packLoadFeedback.reportFinalResult(id, PackLoadFeedback.FinalResult.APPLIED);
                 this.registerForUpdate();

@@ -1,33 +1,22 @@
 package dev.furq.resourcepackcached;
 
-//? if fabric {
-import net.fabricmc.api.ClientModInitializer;
-//?} elif neoforge {
-/*import net.neoforged.fml.common.Mod;
-*///?}
 import dev.furq.resourcepackcached.utils.CachingUtils;
+import net.fabricmc.api.ClientModInitializer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.server.DownloadedPackSource;
 import net.minecraft.client.resources.server.PackReloadConfig;
 import net.minecraft.client.resources.server.ServerPackManager;
 import org.jetbrains.annotations.NotNull;
-
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-//? if neoforge
-/*@Mod("rpc")*/
-public class ResourcePackCached /*? if fabric {*/ implements ClientModInitializer/*?}*/ {
+public class ResourcePackCached implements ClientModInitializer {
 
-    //? if fabric {
     @Override
     public void onInitializeClient() {
-    //?} else {
-    /*public ResourcePackCached() {*/
-    //?}
         Map<UUID, Path> cachedPacks = CachingUtils.readCacheFile();
         if (!cachedPacks.isEmpty()) {
             try {

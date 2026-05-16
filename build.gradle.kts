@@ -1,8 +1,8 @@
 import java.util.*
 
 plugins {
-    id("dev.architectury.loom") version "1.13.+"
-    id("me.modmuss50.mod-publish-plugin") version "0.8.+"
+    id("dev.kikugie.loom-back-compat")
+    id("me.modmuss50.mod-publish-plugin") version "2.0.0-beta.1"
 }
 
 val localProperties = Properties().apply {
@@ -11,143 +11,92 @@ val localProperties = Properties().apply {
     }
 }
 
-class ModData {
-    val id = property("mod.id").toString()
-    val name = property("mod.name")
-    val version = property("mod.version")
-    val group = property("mod.group").toString()
-    val description = property("mod.description")
-    val source = property("mod.source")
-    val issues = property("mod.issues")
-    val license = property("mod.license").toString()
-    val modrinth = property("mod.modrinth")
-    val curseforge = property("mod.curseforge")
-    val discord = property("mod.discord")
-}
+base.archivesName = property("mod.id") as String
+val compatibleVersions: List<String> = sc.properties.rawOrNull("mod", "mc_releases")?.asList().orEmpty().map { it.toString() }
+version = "${property("mod.version")}+${compatibleVersions.first()}${if (compatibleVersions.size > 1) "-${compatibleVersions.last()}" else ""}"
 
-class LoaderData {
-    val loader = loom.platform.get().name.lowercase()
-    val isFabric = loader == "fabric"
-    val isNeoForge = loader == "neoforge"
-}
-
-class McData {
-    val version = property("mod.mc_version")
-    val dep = property("mod.mc_dep")
-}
-
-val mc = McData()
-val mod = ModData()
-val loader = LoaderData()
-
-val mcVersion = stonecutter.current.project.substringBeforeLast('-')
-version = "${mod.version}+${mc.version}-${loader.loader}"
-group = mod.group
-base { archivesName.set(mod.id) }
-
-stonecutter.constants["fabric"] = loader.isFabric
-stonecutter.constants["neoforge"] = loader.isNeoForge
-
-loom {
-    silentMojangMappingsLicense()
-
-    runConfigs.all {
-        ideConfigGenerated(stonecutter.current.isActive)
-        runDir = "../../run"
-    }
-
-    runConfigs.remove(runConfigs["server"])
-    accessWidenerPath = parent?.file("src/main/resources/rpc.accesswidener")
-}
-
-repositories {
-    maven("https://maven.neoforged.net/releases")
+val requiredJava: JavaVersion = when {
+    sc.current.parsed >= "26.1" -> JavaVersion.VERSION_25
+    sc.current.parsed >= "1.20.5" -> JavaVersion.VERSION_21
+    else -> JavaVersion.VERSION_21
 }
 
 dependencies {
-    minecraft("com.mojang:minecraft:${mcVersion}")
+    minecraft("com.mojang:minecraft:${sc.current.version}")
+    loomx.applyMojangMappings()
+    modImplementation("net.fabricmc:fabric-loader:${property("deps.fabric_loader")}")
+}
 
-    @Suppress("UnstableApiUsage")
-    mappings(loom.layered {
-        officialMojangMappings()
-    })
+loom {
+    fabricModJsonPath = rootProject.file("src/main/resources/fabric.mod.json")
+    accessWidenerPath = sc.process(
+        rootProject.file("src/main/resources/rpc.ct"),
+        "build/processed.ct"
+    )
 
-    if (loader.isFabric) {
-        modImplementation("net.fabricmc:fabric-loader:${property("deps.fabric")}")
-    } else if (loader.isNeoForge) {
-        "neoForge"("net.neoforged:neoforge:${findProperty("deps.neoforge")}")
+    decompilerOptions.named("vineflower") {
+        options.put("mark-corresponding-synthetics", "1")
+    }
+
+    runConfigs.all {
+        vmArgs("-Dmixin.debug.export=true")
+        runDir = "../../run"
     }
 }
 
 java {
-    val java = if (stonecutter.eval(mcVersion, ">=1.20.5")) JavaVersion.VERSION_21 else JavaVersion.VERSION_17
-    sourceCompatibility = java
-    targetCompatibility = java
+    targetCompatibility = requiredJava
+    sourceCompatibility = requiredJava
+
+    toolchain {
+        vendor = JvmVendorSpec.ADOPTIUM
+        languageVersion = JavaLanguageVersion.of(requiredJava.majorVersion)
+    }
 }
 
-tasks.processResources {
-    val props = buildMap {
-        put("id", mod.id)
-        put("name", mod.name)
-        put("version", mod.version)
-        put("mcdep", mc.dep)
-        put("description", mod.description)
-        put("source", mod.source)
-        put("issues", mod.issues)
-        put("license", mod.license)
-        put("modrinth", mod.modrinth)
-        put("curseforge", mod.curseforge)
-        put("discord", mod.discord)
-        put("loader", loader.loader)
-
-        if (loader.isNeoForge) {
-            put("forgeConstraint", "[${findProperty("deps.neoforge")},)")
+tasks {
+    processResources {
+        fun MutableMap<String, String>.register(key: String, property: String) {
+            val value: String = sc.properties[property]
+            inputs.property(key, value)
+            set(key, value)
         }
-    }
 
-    props.forEach(inputs::property)
+        val props = buildMap {
+            register("id", "mod.id")
+            register("name", "mod.name")
+            register("version", "mod.version")
+            register("minecraft", "mod.mc_compat")
+        }
 
-    if (loader.isFabric) {
         filesMatching("fabric.mod.json") { expand(props) }
-        exclude("META-INF/neoforge.mods.toml", "pack.mcmeta")
-    }
-    if (loader.isNeoForge) {
-        filesMatching("META-INF/neoforge.mods.toml") { expand(props) }
-        exclude("fabric.mod.json", "rpc.accesswidener")
-    }
-}
 
-if (stonecutter.current.isActive) {
-    rootProject.tasks.register("buildActive") {
-        group = "project"
-        dependsOn(tasks.named("build"))
+        val mixinJava = "JAVA_${requiredJava.majorVersion}"
+        filesMatching("*.mixins.json") { expand("java" to mixinJava) }
     }
-}
 
-tasks.register<Copy>("buildAndCollect") {
-    group = "build"
-    from(tasks.remapJar.get().archiveFile)
-    into(rootProject.layout.buildDirectory.file("libs/${mod.version}"))
-    dependsOn("build")
+    register<Copy>("buildAndCollect") {
+        group = "build"
+        from(loomx.modJar.map { it.archiveFile })
+        into(rootProject.layout.buildDirectory.file("libs/${project.property("mod.version")}"))
+        dependsOn("build")
+    }
 }
 
 publishMods {
-    file = tasks.remapJar.get().archiveFile
-    displayName = "${mod.name} ${mod.version}"
-    version = "${mod.version}"
+    file.set(loomx.modJar.flatMap { it.archiveFile })
+    displayName = "${property("mod.name")} ${property("mod.version")}"
+    version = "${property("mod.version")}"
     changelog = rootProject.file("CHANGELOG.md").readText()
     type = STABLE
-    modLoaders.add(loader.loader)
-    val dep = mc.dep.toString()
-    val lower = """>=\s*([0-9.]+)""".toRegex().find(dep)?.groupValues?.get(1)
-    val upper = """<=\s*([0-9.]+)""".toRegex().find(dep)?.groupValues?.get(1)
+    modLoaders.add("fabric")
 
     modrinth {
         projectId = "d4phKsx2"
         accessToken = localProperties.getProperty("MODRINTH_TOKEN")
         minecraftVersionRange {
-            start = lower ?: "latest"
-            end = upper ?: "latest"
+            start = compatibleVersions.first()
+            end = compatibleVersions.last()
         }
     }
 
@@ -156,8 +105,8 @@ publishMods {
         projectSlug = "resourcepackcached"
         accessToken = localProperties.getProperty("CURSEFORGE_TOKEN")
         minecraftVersionRange {
-            start = lower ?: "latest"
-            end = upper ?: "latest"
+            start = compatibleVersions.first()
+            end = compatibleVersions.last()
         }
     }
 }
