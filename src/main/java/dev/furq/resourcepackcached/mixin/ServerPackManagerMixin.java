@@ -80,6 +80,8 @@ abstract class ServerPackManagerMixin {
     @Inject(method = "popAll", at = @At("HEAD"), cancellable = true)
     private void onPopAll(CallbackInfo ci) {
         latestPacks.clear();
-        ci.cancel();
+        // Only keep server packs applied after you leave when the user opts into the global behaviour;
+        // by default let popAll run so the pack is removed (it stays cached, so rejoining won't re-download).
+        if (CachingUtils.keepGlobally()) ci.cancel();
     }
 }

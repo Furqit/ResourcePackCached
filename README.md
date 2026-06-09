@@ -1,6 +1,6 @@
 # **ResourcePackCached**
 
-ResourcePackCached keeps server resource packs loaded, so they don't need to be reloaded when you rejoin, It also reapplies the last used server resource pack on game startup.
+ResourcePackCached caches server resource packs so they never need to be re-downloaded when you rejoin. By default a cached pack only applies on the server that sent it (and is removed when you leave); an optional mode keeps the last pack loaded everywhere and reapplied on startup.
 
 ---
 
@@ -18,12 +18,17 @@ Perfect for those who want to:
 
 **ResourcePackCached** runs automatically:
 
-| Step | Description                           |
-|------|---------------------------------------|
-| 1    | Caches the server pack on first join. |
-| 2    | Keeps it loaded after disconnecting.  |
-| 3    | Skips reloading when rejoining.       |
-| 4    | Reapplies it on game startup.         |
+| Step | Description                                              |
+|------|---------------------------------------------------------|
+| 1    | Caches the server pack on first join.                   |
+| 2    | Applies it only on that server; removes it when you leave. |
+| 3    | Skips re-downloading when you rejoin.                    |
+
+### Config (`config/rpc-config.json`)
+
+| Key            | Default | Description                                                                                  |
+|----------------|---------|----------------------------------------------------------------------------------------------|
+| `keepGlobally` | `false` | `true` keeps the cached pack applied everywhere and reapplied at startup (the old behaviour). |
 
 ## **Support**
 

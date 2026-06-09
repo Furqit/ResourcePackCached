@@ -22,8 +22,33 @@ public class CachingUtils {
     public static final File GAME_DIR = FabricLoader.getInstance().getGameDir().toFile();
     public static final File CONFIG_DIR = FabricLoader.getInstance().getConfigDir().toFile();
     public static final File CACHE_FILE = new File(CONFIG_DIR, "rpc-data.json");
+    public static final File CONFIG_FILE = new File(CONFIG_DIR, "rpc-config.json");
     public static final Logger LOGGER = LogManager.getLogger("ResourcePackCached");
     public static boolean isStartup = false;
+
+    /**
+     * Whether cached packs stay applied everywhere / at startup (the original behaviour). Default
+     * {@code false} → a cached pack only applies on the server that sent it and is removed when you leave,
+     * while its download is still cached so rejoining never re-downloads. Toggle in
+     * {@code config/rpc-config.json}.
+     */
+    public static boolean keepGlobally() {
+        try {
+            if (CONFIG_FILE.exists()) {
+                JsonObject o = JsonParser.parseString(
+                        FileUtils.readFileToString(CONFIG_FILE, StandardCharsets.UTF_8)).getAsJsonObject();
+                if (o.has("keepGlobally")) return o.get("keepGlobally").getAsBoolean();
+            } else {
+                JsonObject o = new JsonObject();
+                o.addProperty("_comment", "keepGlobally=false (default): cached packs only apply on the server that sent them. true: keep them applied everywhere / at startup (original behaviour).");
+                o.addProperty("keepGlobally", false);
+                FileUtils.writeStringToFile(CONFIG_FILE, o.toString(), StandardCharsets.UTF_8);
+            }
+        } catch (Exception e) {
+            LOGGER.error("Failed to read rpc-config.json", e);
+        }
+        return false;
+    }
 
     public static void writeCacheFile(HashMap<UUID, Path> packs) {
         try {

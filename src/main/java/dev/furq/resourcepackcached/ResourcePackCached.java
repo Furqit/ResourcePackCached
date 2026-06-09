@@ -17,6 +17,7 @@ public class ResourcePackCached implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        if (!CachingUtils.keepGlobally()) return;   // per-server mode: never force-apply cached packs at startup
         Map<UUID, Path> cachedPacks = CachingUtils.readCacheFile();
         if (!cachedPacks.isEmpty()) {
             try {
