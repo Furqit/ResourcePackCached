@@ -13,6 +13,12 @@ public class DownloadedPackSourceMixin {
 
     @Redirect(method = "startReload", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;reloadResourcePacks()Ljava/util/concurrent/CompletableFuture;"))
     public CompletableFuture<Void> onStartReload(Minecraft instance) {
-        return CachingUtils.isStartup ? CompletableFuture.completedFuture(null) : instance.reloadResourcePacks();
+        if (CachingUtils.isStartup) {
+            if (net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("rrls")) {
+                return instance.reloadResourcePacks();
+            }
+            return CompletableFuture.completedFuture(null);
+        }
+        return instance.reloadResourcePacks();
     }
 }
