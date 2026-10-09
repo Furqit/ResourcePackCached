@@ -2,7 +2,7 @@ import java.util.*
 
 plugins {
     id("dev.kikugie.loom-back-compat")
-    id("me.modmuss50.mod-publish-plugin") version "2.0.0-beta.1"
+    id("me.modmuss50.mod-publish-plugin") version "2.2.+"
 }
 
 val localProperties = Properties().apply {

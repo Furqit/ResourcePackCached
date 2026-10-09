@@ -37,6 +37,7 @@ abstract class ServerPackManagerMixin {
 
     @Inject(method = "pushPack", at = @At("HEAD"), cancellable = true)
     public void onPushPack(UUID id, URL url, @Nullable HashCode hash, CallbackInfo ci) {
+        CachingUtils.receivedPacksThisConnection = true;
         if (isNewSequence) {
             latestPacks.clear();
             isNewSequence = false;
@@ -46,6 +47,7 @@ abstract class ServerPackManagerMixin {
             latestPacks.put(id, downloadPath);
 
             if (CachingUtils.isCachedResourcePack(id, hash)) {
+                CachingUtils.updateCachedServer();
                 this.packLoadFeedback.reportUpdate(id, PackLoadFeedback.Update.ACCEPTED);
                 this.packLoadFeedback.reportFinalResult(id, PackLoadFeedback.FinalResult.APPLIED);
                 this.registerForUpdate();
@@ -80,6 +82,7 @@ abstract class ServerPackManagerMixin {
     @Inject(method = "popAll", at = @At("HEAD"), cancellable = true)
     private void onPopAll(CallbackInfo ci) {
         latestPacks.clear();
+        if (CachingUtils.forceUnload) return;
         ci.cancel();
     }
 }
