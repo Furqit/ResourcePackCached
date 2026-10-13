@@ -104,6 +104,8 @@ publishMods {
         projectId = "1125284"
         projectSlug = "resourcepackcached"
         accessToken = localProperties.getProperty("CURSEFORGE_TOKEN")
+        client = true
+        server = false
         minecraftVersionRange {
             start = compatibleVersions.first()
             end = compatibleVersions.last()
