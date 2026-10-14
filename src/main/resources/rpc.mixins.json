@@ -8,7 +8,6 @@
   "mixins": [
     "ClientPacketListenerMixin",
     "DownloadedPackSourceMixin",
-    "JoinMultiplayerScreenMixin",
     "ServerPackManagerMixin"
   ]
 }

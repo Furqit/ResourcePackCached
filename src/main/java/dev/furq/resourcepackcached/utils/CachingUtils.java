@@ -187,12 +187,6 @@ public class CachingUtils {
         }
     }
 
-    public static void resetCachedPacks() {
-        clearCacheFile();
-        unloadAllPacks();
-        LOGGER.info("ResourcePackCached: cleared cached resource packs");
-    }
-
     public static void onNewConnection() {
         receivedPacksThisConnection = false;
     }
