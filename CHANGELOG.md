@@ -1,2 +1,3 @@
 ### Updates & Improvements
-- Removed the Reset Cached Packs button from the multiplayer menu
+- Revert system changes made in 1.2.8
+ - *(I am never gonna try to improve this cursed code again)*
