@@ -1,0 +1,28 @@
+${ loader_header }
+license= "GPL-3.0"
+issueTrackerURL = "https://github.com/Furq07/ResourcePackCached/issues"
+
+[[mods]]
+modId = "${id}"
+version = "${version}"
+displayName = "${name}"
+authors= "Furq"
+description = '''Keeps server resource packs loaded, so they don't need to be reloaded when you rejoin.'''
+logoFile = "assets/rpc/icon.png"
+
+[[mixins]]
+config = "rpc.mixins.json"
+
+[[dependencies.${ id }]]
+modId = "neoforge"
+type= "required"
+versionRange = "[${neo_version},)"
+ordering = "NONE"
+side ="BOTH"
+
+[[dependencies.${ id }]]
+modId = "minecraft"
+type = "required"
+versionRange = "${minecraft}"
+ordering = "NONE"
+side = "CLIENT"

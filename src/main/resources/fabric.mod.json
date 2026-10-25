@@ -17,14 +17,14 @@
   "environment": "client",
   "entrypoints": {
     "client": [
-      "dev.furq.resourcepackcached.ResourcePackCached"
+      "dev.furq.resourcepackcached.FabricInit"
     ]
   },
   "mixins": [
     "rpc.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=0.17",
+    "fabricloader": ">=0.18.0",
     "minecraft": "${minecraft}"
   },
   "accessWidener": "rpc.ct"

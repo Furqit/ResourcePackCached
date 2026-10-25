@@ -1,6 +1,6 @@
 {
   "pack": {
-    "pack_format": 15,
+    "pack_format": 22,
     "description": "Keeps server resource packs loaded, so they don't need to be reloaded when you rejoin."
   }
 }

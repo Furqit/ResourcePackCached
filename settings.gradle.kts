@@ -3,6 +3,7 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
         maven("https://maven.fabricmc.net/")
+        maven("https://maven.neoforged.net/releases/")
         maven("https://maven.kikugie.dev/releases")
     }
 }
@@ -15,6 +16,8 @@ plugins {
 stonecutter {
     create(rootProject) {
         versions("1.20.4", "26.1")
+        version("1.21.1-neoforge", "1.21.1")
+        version("26.3-neoforge", "26.3")
         vcsVersion = "26.1"
     }
 }

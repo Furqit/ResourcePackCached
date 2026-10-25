@@ -9,3 +9,6 @@ accessible field net/minecraft/client/resources/server/ServerPackManager packs L
 accessible field net/minecraft/client/resources/server/ServerPackManager packPromptStatus Lnet/minecraft/client/resources/server/ServerPackManager$PackPromptStatus;
 accessible method net/minecraft/client/resources/server/DownloadedPackSource startReload (Lnet/minecraft/client/resources/server/PackReloadConfig$Callbacks;)V
 accessible field net/minecraft/client/resources/server/DownloadedPackSource manager Lnet/minecraft/client/resources/server/ServerPackManager;
+accessible field net/minecraft/client/resources/server/ServerPackManager packLoadFeedback Lnet/minecraft/client/resources/server/PackLoadFeedback;
+accessible method net/minecraft/client/resources/server/ServerPackManager registerForUpdate ()V
+accessible field net/minecraft/client/multiplayer/ClientCommonPacketListenerImpl serverData Lnet/minecraft/client/multiplayer/ServerData;

@@ -22,4 +22,8 @@ replay_*.log
 *.hprof
 *.jfr
 
+# Local test harness
+src/test/
+versions/*/logs/
+
 local.properties

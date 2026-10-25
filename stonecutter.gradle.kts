@@ -30,9 +30,19 @@ tasks.register("publishCurseforgeAll") {
 }
 
 stonecutter parameters {
+    val loader = if (current.project.endsWith("-neoforge")) "neoforge" else "fabric"
+    val version = current.project.removeSuffix("-neoforge")
+
+    properties {
+        tags(version, loader)
+    }
+
+    constants {
+        match(loader, "fabric", "neoforge")
+    }
+
     swaps["mod_version"] = "\"${property("mod.version")}\";"
     swaps["minecraft"] = "\"${node.metadata.version}\";"
-    constants["release"] = property("mod.id") != "rpc"
 
     replacements {
         string(current.parsed >= "26.1") {
